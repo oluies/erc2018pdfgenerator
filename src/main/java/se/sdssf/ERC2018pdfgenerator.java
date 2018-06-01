@@ -33,8 +33,7 @@ public class ERC2018pdfgenerator {
 
 
     public static void main(String[] args) {
-        InputStream is = null;
-        PDDocument doc = null;
+
         if (args.length == 0) {
             System.out.println("must supply parameters: <pdffile> <csvfile>");
         } else {
@@ -43,21 +42,28 @@ public class ERC2018pdfgenerator {
 
 
 
+
             try {
-                is = new FileInputStream(InpdfFileName);
-                System.out.println("isvalid" + ((FileInputStream) is).getFD().valid());
+
+
 
                 ReadFromCsvFile instance = ReadFromCsvFile.getInstance();
                 final List<FormData> fds = instance.read(IncsvFileName);
-                doc = PDDocument.load(is);
-                PDDocumentCatalog catalog = doc.getDocumentCatalog();
-                PDAcroForm form = catalog.getAcroForm();
 
-                List<PDField> fields = form.getFields();
-
-                Class  aClass = FormData.class;
 
                 for(FormData formdata : fds) {
+
+                    InputStream is = new FileInputStream(InpdfFileName);
+                    PDDocument doc = PDDocument.load(is);
+
+                    PDDocumentCatalog catalog = doc.getDocumentCatalog();
+                    PDAcroForm form = catalog.getAcroForm();
+
+                    List<PDField> fields = form.getFields();
+
+                    Class  aClass = FormData.class;
+
+
 
                     for (PDField pdField : fields) {
                         String pdFieldName =  pdField.getFullyQualifiedName();
@@ -143,40 +149,92 @@ public class ERC2018pdfgenerator {
                     }
 
 
-                    addImageFromURL(doc,formdata.urlf);
-                    addImageFromURL(doc,formdata.urlo);
-                    addImageFromURL(doc,formdata.urlp);
+                    PDDocument invitation = PDDocument.load( new FileInputStream("inbjudan.pdf"));
 
 
+                    PDDocumentCatalog invitationcatalog = invitation.getDocumentCatalog();
+                    PDAcroForm finvitationorm = invitationcatalog.getAcroForm();
 
-                    doc.setAllSecurityToBeRemoved(true);
 
-                    doc.save(formdata.ercID + "_" + formdata.Efternamn + "_" + formdata.Nationalitet+".pdf");
+                    finvitationorm.getField("Födelsetid").setValue(formdata.getFodelsetid());
+                    finvitationorm.getField("Efternamn_2").setValue(formdata.getEfternamn());
+                    finvitationorm.getField("Tilltalsnamn_2").setValue(formdata.getTilltalsnamn());
+                    finvitationorm.getField("Adress_2").setValue(formdata.getAdress());
+                    finvitationorm.getField("Postnummer_2").setValue(formdata.getPostnummer());
+                    finvitationorm.getField("Ort_2").setValue(formdata.getOrt());
+                    finvitationorm.getField("Land_2").setValue(formdata.getLand());
+                    finvitationorm.getField("Nationalitet_2").setValue(formdata.getNationalitet());
+                    finvitationorm.getField("Telefon_2").setValue(formdata.getTelefon());
+                    finvitationorm.getField("Epostadress_2").setValue(formdata.getEpost());
+
+
+                    for (PDField pdField : finvitationorm.getFields()) {
+                        String pdFieldName =  pdField.getFullyQualifiedName();
+
+
+                            LOGGER.log( Level.INFO,pdFieldName, "");
+
+                    }
+
+
+                    /*INFO: Födelsetid
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Efternamn_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Tilltalsnamn_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Adress_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Postnummer_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Ort_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Land_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Nationalitet_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Telefon_2
+                    May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
+                    INFO: Epostadress_2*/
+
+
+                    PDPage invitationpage1 = invitation.getPage(0);
+                    doc.addPage(invitationpage1);
+
+
+                    addImageFromURL(doc,formdata.getUrlf());
+                    addImageFromURL(doc,formdata.getUrlo());
+                    addImageFromURL(doc,formdata.getUrlp());
+                    addImageFromURL(doc,formdata.getUrlPOA());
+
+
+                    String fileName = "ERC_" + formdata.getErcID() + "_" + formdata.getEfternamn() + "_" + formdata.getTilltalsnamn() + "_" +  formdata.getLand()+".pdf";
+                    String fixed = fileName.replaceAll("[^\\x00-\\x7F]", "").replace("\n", "").replace("'$'\\r''","").replace(" ","_");
+
+                    doc.save(fixed);
+
                     doc.close();
 
+                    // OK PDFBOX HAS SOME MEMMORY ISSUES ARGHH
+                    System.gc();
+
+
                 }
+
+
 
             } catch (FileNotFoundException e) {
                 System.out.println(String.format("\"%s\": file non trovato.", InpdfFileName));
+                System.out.println(String.format(e.getMessage()));
+                e.printStackTrace();
             } catch (IOException e) {
                 System.out.println(String.format("\"%s\": file non è un PDF valido.", InpdfFileName));
+                System.out.println(String.format(e.getMessage()));
+                e.printStackTrace();
+
+
             }  catch (NoSuchFieldException e) {
                 e.printStackTrace();
-            } finally {
-                if (is != null){
-                    try {
-                        is.close();
-                    } catch (IOException e) {
-                        System.out.println(String.format("\"%s\": impossibile chiudere lo stream.", InpdfFileName));
-                    }
-                }
-                if (doc != null) {
-                    try {
-                        doc.close();
-                    } catch (IOException e) {
-                        System.out.println(String.format("\"%s\": impossibile chiudere il documento PDF.", InpdfFileName));
-                    }
-                }
             }
         }
 
@@ -186,42 +244,58 @@ public class ERC2018pdfgenerator {
 
     private static void addImageFromURL(final PDDocument doc,final String urlstring ) throws IOException {
 
-        if(urlstring != null && !urlstring.isEmpty()){
-        BufferedImage image  = null;
-        try {
-            URL url = new URL(urlstring);
-            System.out.println(url);
+        if(urlstring != null && !urlstring.isEmpty()) {
 
-            image = ImageIO.read(url);
-        } catch (IOException e) {
-            System.out.println(e.toString());
-        }
+            if (urlstring.endsWith(".pdf")) {
 
+                InputStream input = new URL(urlstring).openStream();
+                final PDDocument urldoc = PDDocument.load( input);
 
-        System.out.println( image.toString());
+                for (PDPage pdPage : urldoc.getPages()) {
+                    doc.addPage(pdPage);
 
-        // createFromFile is the easiest way with an image file
-        // if you already have the image in a BufferedImage,
-        // call LosslessFactory.createFromImage() instead
-        PDImageXObject pdImage = LosslessFactory.createFromImage(doc, image);
-        //PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath, doc);
+                }
+                //urldoc.close();
+                //input.close();
 
-        PDPage imagepage = new PDPage();
-        doc.addPage(imagepage);
+            } else {
+                BufferedImage image = null;
+                try {
+                    URL url = new URL(urlstring);
+                    System.out.println(url);
 
-        PDPageContentStream contentStream = new PDPageContentStream(doc, imagepage, PDPageContentStream.AppendMode.APPEND, true, true);
-
-
-        // contentStream.drawImage(ximage, 20, 20 );
-        // better method inspired by http://stackoverflow.com/a/22318681/535646
-        // reduce this value if the image is too large
-        float scale = 1f;
-        contentStream.drawImage(pdImage, 20, 20, pdImage.getWidth()*scale, pdImage.getHeight()*scale);
-
-        contentStream.close();
+                    image = ImageIO.read(url);
+                } catch (IOException e) {
+                    System.out.println(e.toString());
+                }
 
 
-        System.out.println("Image inserted");
+                System.out.println(image.toString());
+
+                // createFromFile is the easiest way with an image file
+                // if you already have the image in a BufferedImage,
+                // call LosslessFactory.createFromImage() instead
+                final PDImageXObject pdImage = LosslessFactory.createFromImage(doc, image);
+                //PDImageXObject pdImage = PDImageXObject.createFromFile(imagePath, doc);
+
+                final PDPage imagepage = new PDPage();
+
+                final PDPageContentStream contentStream = new PDPageContentStream(doc, imagepage, PDPageContentStream.AppendMode.APPEND, true, true);
+
+
+                // contentStream.drawImage(ximage, 20, 20 );
+                // better method inspired by http://stackoverflow.com/a/22318681/535646
+                // reduce this value if the image is too large
+                float scale = 0.4f;
+                contentStream.drawImage(pdImage, 20, 20, 500, 500);
+
+                doc.addPage(imagepage);
+
+                contentStream.close();
+
+
+                System.out.println("Image inserted");
+            }
         }
 
     }

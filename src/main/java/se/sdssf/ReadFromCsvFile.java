@@ -47,12 +47,17 @@ public class ReadFromCsvFile {
                     // Accessing Values by Column Index
                     String name = csvRecord.get(1);
                     String[] split = name.split(" ");
+
                     try {
-                        fd.setEfternamn( split[1]);
+                        fd.setEfternamn(split[split.length-1]);
                     } catch (Exception e) {
                     }
                     try {
-                        fd.setTilltalsnamn(split[0]);
+                        String tilltalsnan = "";
+                        for (int i = 0; i < split.length-1 ; i++) {
+                            tilltalsnan += split[i] + " ";
+                        }
+                        fd.setTilltalsnamn(tilltalsnan);
                     } catch (Exception e) {
                     }
 
@@ -69,15 +74,11 @@ public class ReadFromCsvFile {
                     } catch (Exception e) {
                     }
                     try {
-                        fd.setPostnummer(adresslines[1]);
+                        fd.setPostnummer(adresslines[2]);
                     } catch (Exception e) {
                     }
                     try {
-                        fd.setOrt( adresslines[2]);
-                    } catch (Exception e) {
-                    }
-                    try {
-                        fd.setLand(adresslines[4]);
+                        fd.setOrt( adresslines[1]);
                     } catch (Exception e) {
                     }
 
@@ -94,9 +95,10 @@ public class ReadFromCsvFile {
 
                     fd.setTillverkningsnummer1( csvRecord.get(10));
 
-                    fd.setAmmunition1(csvRecord.get(11));
+                    fd.setKaliber1(csvRecord.get(11));
 
-                    fd.setKaliber1(csvRecord.get(12));
+                    fd.setAmmunition1(csvRecord.get(12));
+
 
                     fd.setVapentyp2( csvRecord.get(13)) ;
 
@@ -106,9 +108,11 @@ public class ReadFromCsvFile {
 
                     fd.setTillverkningsnummer2(csvRecord.get(16));
 
-                    fd.setAmmunition2( csvRecord.get(17));
 
-                    fd.setKaliber2(csvRecord.get(18));
+                    fd.setKaliber2(csvRecord.get(17));
+
+                    fd.setAmmunition2( csvRecord.get(18));
+
 
                     fd.setEfternamnVard("Svenska Dynamiska");
                     fd.setTilltalsnamnVard( "Sportskytteförbundet");
@@ -120,11 +124,15 @@ public class ReadFromCsvFile {
                     fd.setEpostVard("ORDFORANDE@SDSSF.SE");
                     fd.setAdressVard( "Syrenvägen 7");
                     fd.setOrtVard( "Väckelsång");
-                    fd.PostnummerVard = "362 51";
+                    fd.setPostnummerVard("362 51");
+                    fd.setDatumIn("2018-JUL-20");
+                    fd.setDatumUt("2018-AUG-19");
 
                     fd.urlp = csvRecord.get(19);
                     fd.urlf = csvRecord.get(20);
                     fd.urlo = csvRecord.get(21);
+
+                    fd.urlPOA = csvRecord.get(22);
 
                     fds.add(fd);
 

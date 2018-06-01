@@ -2,6 +2,8 @@ package se.sdssf;
 
 public class FormData {
 
+    public String urlPOA;
+
     public Long getErcID() {
         return ercID;
     }
@@ -672,6 +674,14 @@ public class FormData {
 
     public void setUrlf(String urlf) {
         this.urlf = urlf;
+    }
+
+    public String getUrlPOA() {
+        return urlPOA;
+    }
+
+    public void setUrlPOA(String urlPOA) {
+        this.urlPOA = urlPOA;
     }
 
     public Long ercID = 0L;
