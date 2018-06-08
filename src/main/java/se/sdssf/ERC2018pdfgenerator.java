@@ -168,14 +168,6 @@ public class ERC2018pdfgenerator {
                     finvitationorm.getField("Epostadress_2").setValue(formdata.getEpost());
 
 
-                    for (PDField pdField : finvitationorm.getFields()) {
-                        String pdFieldName =  pdField.getFullyQualifiedName();
-
-
-                            LOGGER.log( Level.INFO,pdFieldName, "");
-
-                    }
-
 
                     /*INFO: Födelsetid
                     May 26, 2018 1:51:32 PM se.sdssf.ERC2018pdfgenerator main
@@ -214,8 +206,12 @@ public class ERC2018pdfgenerator {
                     doc.save(fixed);
 
                     doc.close();
+                    doc = null;
+
+
 
                     // OK PDFBOX HAS SOME MEMMORY ISSUES ARGHH
+                    System.gc();
                     System.gc();
 
 
@@ -245,6 +241,7 @@ public class ERC2018pdfgenerator {
     private static void addImageFromURL(final PDDocument doc,final String urlstring ) throws IOException {
 
         if(urlstring != null && !urlstring.isEmpty()) {
+            LOGGER.log(Level.INFO,"URL " + urlstring);
 
             if (urlstring.endsWith(".pdf")) {
 
