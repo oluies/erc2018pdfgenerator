@@ -1,5 +1,7 @@
 package se.sdssf;
 
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentCatalog;
 import org.apache.pdfbox.pdmodel.PDPage;
@@ -54,7 +56,7 @@ public class ERC2018pdfgenerator {
                 for(FormData formdata : fds) {
 
                     InputStream is = new FileInputStream(InpdfFileName);
-                    PDDocument doc = PDDocument.load(is);
+                    PDDocument doc = Loader.loadPDF(new RandomAccessReadBuffer(is));
 
                     PDDocumentCatalog catalog = doc.getDocumentCatalog();
                     PDAcroForm form = catalog.getAcroForm();
@@ -149,7 +151,7 @@ public class ERC2018pdfgenerator {
                     }
 
 
-                    PDDocument invitation = PDDocument.load( new FileInputStream("inbjudan.pdf"));
+                    PDDocument invitation = Loader.loadPDF(new File("inbjudan.pdf"));
 
 
                     PDDocumentCatalog invitationcatalog = invitation.getDocumentCatalog();
@@ -246,7 +248,7 @@ public class ERC2018pdfgenerator {
             if (urlstring.endsWith(".pdf")) {
 
                 InputStream input = new URL(urlstring).openStream();
-                final PDDocument urldoc = PDDocument.load( input);
+                final PDDocument urldoc = Loader.loadPDF(new RandomAccessReadBuffer(input));
 
                 for (PDPage pdPage : urldoc.getPages()) {
                     doc.addPage(pdPage);
